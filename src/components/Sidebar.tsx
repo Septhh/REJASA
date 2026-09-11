@@ -25,7 +25,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
     },
     {
       id: 'jurnal-laboratorium',
-      label: 'Arsip Jurnal',
+      label: 'Jurnal Laboratorium',
       icon: 'menu_book',
       badge: `${pendingCount} Pending`,
       badgeType: 'warning',
@@ -37,12 +37,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
     },
     {
       id: 'lab-qr-core',
-      label: 'Akses & QR',
+      label: 'QR Laboratorium',
       icon: 'qr_code_scanner',
     },
     {
       id: 'inventaris-alat',
-      label: 'Kategori Jurnal',
+      label: 'Laboratorium',
       icon: 'science',
     },
     {
@@ -82,7 +82,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   REJASA
                 </span>
                 <span className="text-xs text-slate-400 truncate mt-1">
-                  Rapid Access Journal
+                  Rapid Access Journal • Lab System
                 </span>
               </div>
             </div>
@@ -104,7 +104,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             <div className="px-3 py-1.5 flex items-center justify-between rounded-xl bg-slate-800/80 mb-2 border border-slate-700/50">
               <div className="flex items-center gap-2">
                 <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                <span className="text-xs font-medium text-slate-300">REJASA Central</span>
+                <span className="text-xs font-medium text-slate-300">REJASA Lab System</span>
               </div>
               <span className="text-[11px] font-semibold tracking-wider text-[#89f5e7] bg-[#89f5e7]/10 px-1.5 py-0.5 rounded">
                 ONLINE
@@ -165,7 +165,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 Dra. Sri Wahyuni
               </span>
               <span className="text-xs text-slate-400 truncate">
-                Administrator REJASA
+                Administrator Laboratorium
               </span>
               <span className="text-[11px] text-[#89f5e7] truncate mt-0.5 font-medium">
                 SMAN 3 Salatiga
