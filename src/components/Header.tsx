@@ -22,22 +22,22 @@ export const Header: React.FC<HeaderProps> = ({
   const notifications = [
     {
       id: 'notif-1',
-      title: 'Review Jurnal Diperlukan!',
-      desc: 'Salah satu jurnal memerlukan tindak lanjut reviewer.',
+      title: 'Review Jurnal Diperlukan',
+      desc: 'Ada jurnal laboratorium yang menunggu review.',
       time: '15 mnt lalu',
       type: 'danger',
     },
     {
       id: 'notif-2',
-      title: 'Jurnal Baru Masuk',
-      desc: 'Ada jurnal baru yang siap ditinjau di REJASA.',
+      title: 'Jurnal Laboratorium Baru',
+      desc: 'Ada jurnal baru yang siap ditinjau oleh laboran.',
       time: '45 mnt lalu',
       type: 'info',
     },
     {
       id: 'notif-3',
-      title: 'Pembaruan Arsip',
-      desc: 'Kategori dan metadata jurnal telah diperbarui.',
+      title: 'Pembaruan Laboratorium',
+      desc: 'Data laboratorium dan QR akses telah diperbarui.',
       time: '1 jam lalu',
       type: 'warning',
     },
@@ -64,7 +64,7 @@ export const Header: React.FC<HeaderProps> = ({
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Cari judul, penulis, kelas, atau jurnal..."
+            placeholder="Cari nomor jurnal, guru, kelas, atau kegiatan..."
             className="w-full h-10 pl-9 pr-4 rounded-xl bg-[#F8FAFC] text-[#131b2e] text-sm border border-[#E2E8F0] focus:outline-none focus:border-[#00685f] focus:ring-2 focus:ring-[#00685f]/15 transition-all placeholder:text-slate-400"
           />
           {searchQuery && (
@@ -91,7 +91,7 @@ export const Header: React.FC<HeaderProps> = ({
           className="h-9 sm:h-10 px-3 sm:px-4 rounded-xl bg-[#00685f] hover:bg-[#008378] text-white text-xs sm:text-sm font-semibold flex items-center gap-1.5 shadow-sm transition-all active:scale-98"
         >
           <span className="material-symbols-outlined text-[18px]">qr_code</span>
-          <span>+ Buat Jurnal QR</span>
+          <span>+ Generate QR Lab</span>
         </button>
 
         <button
