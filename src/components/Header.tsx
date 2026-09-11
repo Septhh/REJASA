@@ -22,22 +22,22 @@ export const Header: React.FC<HeaderProps> = ({
   const notifications = [
     {
       id: 'notif-1',
-      title: 'Lensa Objektif Rusak!',
-      desc: 'BIO-MIC-03 memerlukan tiket perbaikan segera (Kelas XI IPA 1).',
+      title: 'Review Jurnal Diperlukan!',
+      desc: 'Salah satu jurnal memerlukan tindak lanjut reviewer.',
       time: '15 mnt lalu',
       type: 'danger',
     },
     {
       id: 'notif-2',
-      title: 'Jurnal Masuk - Kimia',
-      desc: 'Pak Anton Wijaya submit jurnal Standarisasi NaOH.',
+      title: 'Jurnal Baru Masuk',
+      desc: 'Ada jurnal baru yang siap ditinjau di REJASA.',
       time: '45 mnt lalu',
       type: 'info',
     },
     {
       id: 'notif-3',
-      title: 'Peringatan Stok Reagen',
-      desc: 'HCl 0.1M dan Fenolftalein di Lab Kimia tersisa < 20%.',
+      title: 'Pembaruan Arsip',
+      desc: 'Kategori dan metadata jurnal telah diperbarui.',
       time: '1 jam lalu',
       type: 'warning',
     },
@@ -64,7 +64,7 @@ export const Header: React.FC<HeaderProps> = ({
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Cari kode reagen, alat, atau jurnal..."
+            placeholder="Cari judul, penulis, kelas, atau jurnal..."
             className="w-full h-10 pl-9 pr-4 rounded-xl bg-[#F8FAFC] text-[#131b2e] text-sm border border-[#E2E8F0] focus:outline-none focus:border-[#00685f] focus:ring-2 focus:ring-[#00685f]/15 transition-all placeholder:text-slate-400"
           />
           {searchQuery && (
@@ -123,7 +123,7 @@ export const Header: React.FC<HeaderProps> = ({
               <div className="flex items-center justify-between pb-3 border-b border-slate-100">
                 <div className="flex items-center gap-2">
                   <span className="font-['Plus_Jakarta_Sans'] font-bold text-sm text-[#131b2e]">
-                    Pemberitahuan Lab
+                    Pemberitahuan REJASA
                   </span>
                   <span className="px-2 py-0.5 text-xs font-semibold bg-[#FFF1F2] text-[#E11D48] rounded-full">
                     {unreadAlertCount} Baru
