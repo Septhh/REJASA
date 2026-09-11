@@ -266,13 +266,13 @@ export default function App() {
                     </span>
                   </div>
                   <h1 className="font-['Plus_Jakarta_Sans'] text-2xl sm:text-3xl font-extrabold text-[#131b2e] tracking-tight">
-                    Ringkasan Aktivitas REJASA
+                    Dashboard Laboratorium
                   </h1>
                   <p className="text-xs sm:text-sm text-[#3d4947] flex items-center gap-1.5 mt-1">
                     <span className="material-symbols-outlined text-[16px] text-[#00685f]">
                       verified
                     </span>
-                    Pusat akses cepat untuk pemantauan, pengelolaan, review, dan pengarsipan jurnal akademik SMAN 3 Salatiga.
+                    Sistem jurnal laboratorium digital untuk pencatatan cepat, review, dan pelacakan penggunaan laboratorium SMAN 3 Salatiga.
                   </p>
                 </div>
 
@@ -360,7 +360,7 @@ export default function App() {
                 occupiedLabsCount={occupiedLabsCount}
                 totalLabsCount={rooms.length}
                 onFilterPending={() => {
-                  setActiveTab('arsip-jurnal');
+                  setActiveTab('jurnal-laboratorium');
                 }}
                 onFilterIncidents={() => {
                   const firstOpen = incidents.find((i) => i.status === 'Open');
@@ -386,7 +386,7 @@ export default function App() {
                     journals={journals}
                     searchQuery={searchQuery}
                     onReviewJournal={handleOpenReview}
-                    onViewAllJournals={() => setActiveTab('arsip-jurnal')}
+                    onViewAllJournals={() => setActiveTab('jurnal-laboratorium')}
                   />
 
                   {/* Inline Bar Chart: Sebaran Alokasi Jam REJASA */}
@@ -418,11 +418,11 @@ export default function App() {
                   </button>
                   <div>
                     <h2 className="font-['Plus_Jakarta_Sans'] text-xl font-bold text-[#131b2e]">
-                      {activeTab === 'arsip-jurnal' && 'Arsip & Manajemen Jurnal'}
-                      {activeTab === 'review-jurnal' && 'Antrean Review Jurnal'}
-                      {activeTab === 'lab-qr-core' && 'Akses Jurnal & Otentikasi QR'}
-                      {activeTab === 'inventaris-alat' && 'Kategori & Metadata Jurnal'}
-                      {activeTab === 'audit-laporan' && 'Audit Trail & Rekapitulasi Jurnal'}
+                      {activeTab === 'arsip-jurnal' && 'Jurnal Laboratorium'}
+                      {activeTab === 'review-jurnal' && 'Review Jurnal'}
+                      {activeTab === 'lab-qr-core' && 'Akses QR Laboratorium'}
+                      {activeTab === 'inventaris-alat' && 'Manajemen Laboratorium'}
+                      {activeTab === 'audit-laporan' && 'Audit & Laporan'}
                     </h2>
                     <p className="text-xs text-slate-500 mt-0.5">
                       REJASA — Rapid Access Journal SMAN 3 Salatiga
@@ -451,7 +451,7 @@ export default function App() {
               {activeTab === 'review-jurnal' && (
                 <div>
                   <div className="mb-4 p-4 rounded-xl bg-[#FFFBEB] border border-amber-200 text-xs text-amber-800">
-                    Berikut adalah daftar praktikum yang membutuhkan verifikasi kepala jurnal dalam SLA 60 menit.
+                    Berikut adalah jurnal yang membutuhkan review laboran.
                   </div>
                   <JournalTable
                     journals={journals.filter((j) => j.status !== 'REVIEWED')}
