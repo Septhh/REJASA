@@ -17,12 +17,14 @@ export const JournalTable: React.FC<JournalTableProps> = ({
 }) => {
   const [statusFilter, setStatusFilter] = useState<'ALL' | JournalStatus>('ALL');
   const [showFilterMenu, setShowFilterMenu] = useState(false);
+  const [labFilter, setLabFilter] = useState('ALL');
 
   // Filter journals based on status and search query
   const filteredJournals = journals.filter((j) => {
     const matchesStatus = statusFilter === 'ALL' || j.status === statusFilter;
+    const matchesLab = labFilter === 'ALL' || j.labCode === labFilter;
     const query = searchQuery.toLowerCase().trim();
-    if (!query) return matchesStatus;
+    if (!query) return matchesStatus && matchesLab;
     const matchesQuery =
       j.code.toLowerCase().includes(query) ||
       j.labCode.toLowerCase().includes(query) ||
@@ -30,7 +32,7 @@ export const JournalTable: React.FC<JournalTableProps> = ({
       j.className.toLowerCase().includes(query) ||
       j.topic.toLowerCase().includes(query) ||
       (j.notes && j.notes.toLowerCase().includes(query));
-    return matchesStatus && matchesQuery;
+    return matchesStatus && matchesLab && matchesQuery;
   });
 
   return (
@@ -47,12 +49,25 @@ export const JournalTable: React.FC<JournalTableProps> = ({
             </h2>
           </div>
           <p className="text-xs text-slate-500 mt-1">
-            Daftar entri form kepatuhan lab sesuai instruksi kurikulum praktikum aktif.
+            Pencarian, filter status, filter laboratorium, review, dan ekspor data jurnal laboratorium.
           </p>
         </div>
 
         {/* Actions: Filter & Export */}
-        <div className="flex items-center gap-2 relative">
+        <div className="flex flex-wrap items-center gap-2 relative">
+          <select
+            value={labFilter}
+            onChange={(e) => setLabFilter(e.target.value)}
+            className="px-3 py-1.5 rounded-lg bg-[#F8FAFC] text-[#131b2e] text-xs font-semibold border border-slate-200 outline-none"
+            aria-label="Filter laboratorium"
+          >
+            <option value="ALL">Semua Lab</option>
+            <option value="BIO">BIO</option>
+            <option value="FIS">FIS</option>
+            <option value="KIM">KIM</option>
+            <option value="COM">COM</option>
+            <option value="BSM">BSM</option>
+          </select>
           <div className="relative">
             <button
               id="btn-filter-status"
@@ -292,7 +307,7 @@ export const JournalTable: React.FC<JournalTableProps> = ({
           onClick={onViewAllJournals}
           className="text-xs font-bold text-[#00685f] hover:text-[#008378] flex items-center gap-1 transition-colors"
         >
-          <span>Buka Seluruh Arsip Jurnal Praktikum</span>
+          <span>Buka Seluruh Jurnal Laboratorium</span>
           <span className="material-symbols-outlined text-[16px]">arrow_forward</span>
         </button>
       </div>
