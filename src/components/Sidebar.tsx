@@ -25,7 +25,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
     },
     {
       id: 'jurnal-laboratorium',
-      label: 'Jurnal Laboratorium',
+      label: 'Arsip Jurnal',
       icon: 'menu_book',
       badge: `${pendingCount} Pending`,
       badgeType: 'warning',
@@ -37,12 +37,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
     },
     {
       id: 'lab-qr-core',
-      label: 'Lab & QR Core',
+      label: 'Akses & QR',
       icon: 'qr_code_scanner',
     },
     {
       id: 'inventaris-alat',
-      label: 'Inventaris & Alat',
+      label: 'Kategori Jurnal',
       icon: 'science',
     },
     {
@@ -73,16 +73,16 @@ export const Sidebar: React.FC<SidebarProps> = ({
           <div className="p-6 flex items-center justify-between border-b border-slate-800">
             <div className="flex items-center gap-3">
               <img
-                alt="SLMS Lab Flask Icon"
+                alt="REJASA Logo"
                 className="h-8 w-auto object-contain"
                 src="https://lh3.googleusercontent.com/aida/AEtjO1WCeLzecpV83AZgHYUqqdEO5ksiJ0DyEzOvu4qp-HRmltyJ-K4aPmcz1HnS_FqaHQY7tapwSw9zGea61BSpyj9UGtN3gXr97a_cvkf095haTFbNHsvljFVUAYisd_JjGJ2c39JvOtv86wxRaoFhZqhfgWYCZcunDK8t4YtmcUdyIMVQLFUtZaF6TFr7TH27sclzbMB-HH440BF4kjYU27ZBGvk1qd6XPAwFQbrJ0htMb0BhH2a8Rb587_2Z"
               />
               <div className="flex flex-col min-w-0">
                 <span className="font-['Plus_Jakarta_Sans'] font-bold text-lg text-white tracking-tight leading-none truncate">
-                  SLMS Core
+                  REJASA
                 </span>
                 <span className="text-xs text-slate-400 truncate mt-1">
-                  SMA Negeri 1 EduLab
+                  Rapid Access Journal
                 </span>
               </div>
             </div>
@@ -104,7 +104,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             <div className="px-3 py-1.5 flex items-center justify-between rounded-xl bg-slate-800/80 mb-2 border border-slate-700/50">
               <div className="flex items-center gap-2">
                 <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                <span className="text-xs font-medium text-slate-300">Node Lab Central</span>
+                <span className="text-xs font-medium text-slate-300">REJASA Central</span>
               </div>
               <span className="text-[11px] font-semibold tracking-wider text-[#89f5e7] bg-[#89f5e7]/10 px-1.5 py-0.5 rounded">
                 ONLINE
@@ -165,10 +165,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 Dra. Sri Wahyuni
               </span>
               <span className="text-xs text-slate-400 truncate">
-                Kepala Laboratorium
+                Administrator REJASA
               </span>
               <span className="text-[11px] text-[#89f5e7] truncate mt-0.5 font-medium">
-                SMAN 1 Lab Central
+                SMAN 3 Salatiga
               </span>
             </div>
           </div>
