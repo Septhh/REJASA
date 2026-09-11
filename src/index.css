@@ -1,0 +1,53 @@
+@import "tailwindcss";
+
+@theme {
+  --color-surface-base: #F8FAFC;
+  --color-surface-card: #FFFFFF;
+  --color-surface-sidebar: #0F172A;
+  --color-primary: #00685f;
+  --color-primary-container: #008378;
+  --color-on-primary: #ffffff;
+  --color-on-primary-container: #f4fffc;
+  --color-primary-fixed: #89f5e7;
+  --color-secondary: #00687a;
+  --color-secondary-container: #57dffe;
+  --color-border-subtle: #E2E8F0;
+  --color-border-strong: #CBD5E1;
+  --color-status-reviewed: #059669;
+  --color-status-reviewed-bg: #ECFDF5;
+  --color-status-submitted: #0284C7;
+  --color-status-submitted-bg: #F0F9FF;
+  --color-status-warning: #D97706;
+  --color-status-warning-bg: #FFFBEB;
+  --color-status-problem: #E11D48;
+  --color-status-problem-bg: #FFF1F2;
+  --color-surface-container-high: #e2e7ff;
+  --color-surface-container-highest: #dae2fd;
+  --color-surface-container-low: #f2f3ff;
+  --color-on-surface: #131b2e;
+  --color-on-surface-variant: #3d4947;
+  --font-headline: 'Plus Jakarta Sans', sans-serif;
+  --font-body: 'Inter', sans-serif;
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  background-color: #F8FAFC;
+  color: #131b2e;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+}
+
+.material-symbols-outlined {
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+  vertical-align: middle;
+  display: inline-block;
+  line-height: 1;
+}
+
+.tabular-nums {
+  font-feature-settings: 'tnum' on, 'cv05' on, 'zero' on;
+}
+

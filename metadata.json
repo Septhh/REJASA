@@ -1,0 +1,6 @@
+{
+  "name": "SLMS Core - Laboratorium EduLab",
+  "description": "Sistem Manajemen Laboratorium Sekolah SMAN 1 EduLab untuk monitoring SOP, verifikasi jurnal praktikum, dan pelaporan insiden alat.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
