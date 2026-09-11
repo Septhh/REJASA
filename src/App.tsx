@@ -418,7 +418,7 @@ export default function App() {
                   </button>
                   <div>
                     <h2 className="font-['Plus_Jakarta_Sans'] text-xl font-bold text-[#131b2e]">
-                      {activeTab === 'arsip-jurnal' && 'Jurnal Laboratorium'}
+                      {activeTab === 'jurnal-laboratorium' && 'Jurnal Laboratorium'}
                       {activeTab === 'review-jurnal' && 'Review Jurnal'}
                       {activeTab === 'lab-qr-core' && 'Akses QR Laboratorium'}
                       {activeTab === 'inventaris-alat' && 'Manajemen Laboratorium'}
@@ -439,7 +439,7 @@ export default function App() {
               </div>
 
               {/* View details */}
-              {activeTab === 'arsip-jurnal' && (
+              {activeTab === 'jurnal-laboratorium' && (
                 <JournalTable
                   journals={journals}
                   searchQuery={searchQuery}
