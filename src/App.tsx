@@ -201,7 +201,7 @@ export default function App() {
     setIsRefreshing(true);
     setTimeout(() => {
       setIsRefreshing(false);
-      showToast('Data sistem laboratorium berhasil disinkronkan.');
+      showToast('Data REJASA berhasil disinkronkan.');
     }, 700);
   };
 
@@ -258,7 +258,7 @@ export default function App() {
                 <div className="flex flex-col">
                   <div className="flex items-center gap-2 mb-1">
                     <span className="font-mono text-xs uppercase tracking-widest text-[#00685f] font-bold">
-                      SMAN 1 EDULAB • OPS CONTROL ROOM
+                      REJASA • RAPID ACCESS JOURNAL
                     </span>
                     <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#ECFDF5] text-[#059669] text-xs font-semibold border border-emerald-200">
                       <span className="w-2 h-2 rounded-full bg-[#059669] animate-ping"></span>
@@ -266,13 +266,13 @@ export default function App() {
                     </span>
                   </div>
                   <h1 className="font-['Plus_Jakarta_Sans'] text-2xl sm:text-3xl font-extrabold text-[#131b2e] tracking-tight">
-                    Ringkasan Operasional Laboratorium
+                    Ringkasan Aktivitas REJASA
                   </h1>
                   <p className="text-xs sm:text-sm text-[#3d4947] flex items-center gap-1.5 mt-1">
                     <span className="material-symbols-outlined text-[16px] text-[#00685f]">
                       verified
                     </span>
-                    Monitoring kepatuhan SOP Bab 10, rekonsiliasi jurnal Bab 24, serta registrasi insiden Bab 43.
+                    Pusat akses cepat untuk pemantauan, pengelolaan, review, dan pengarsipan jurnal akademik SMAN 3 Salatiga.
                   </p>
                 </div>
 
@@ -282,7 +282,7 @@ export default function App() {
                   <div className="bg-white px-3.5 py-1.5 rounded-xl shadow-sm border border-[#E2E8F0] flex items-center gap-3">
                     <div className="flex flex-col">
                       <span className="text-[10px] text-slate-400 font-medium uppercase tracking-wider">
-                        Waktu Server Lab
+                        Waktu Sistem REJASA
                       </span>
                       <span
                         id="realtime-clock"
@@ -360,7 +360,7 @@ export default function App() {
                 occupiedLabsCount={occupiedLabsCount}
                 totalLabsCount={rooms.length}
                 onFilterPending={() => {
-                  setActiveTab('jurnal-laboratorium');
+                  setActiveTab('arsip-jurnal');
                 }}
                 onFilterIncidents={() => {
                   const firstOpen = incidents.find((i) => i.status === 'Open');
@@ -386,10 +386,10 @@ export default function App() {
                     journals={journals}
                     searchQuery={searchQuery}
                     onReviewJournal={handleOpenReview}
-                    onViewAllJournals={() => setActiveTab('jurnal-laboratorium')}
+                    onViewAllJournals={() => setActiveTab('arsip-jurnal')}
                   />
 
-                  {/* Inline Bar Chart: Sebaran Alokasi Jam Laboratorium */}
+                  {/* Inline Bar Chart: Sebaran Alokasi Jam REJASA */}
                   <LabHoursChart allocations={weeklyAllocation} />
                 </div>
 
@@ -418,14 +418,14 @@ export default function App() {
                   </button>
                   <div>
                     <h2 className="font-['Plus_Jakarta_Sans'] text-xl font-bold text-[#131b2e]">
-                      {activeTab === 'jurnal-laboratorium' && 'Arsip & Manajemen Jurnal Laboratorium'}
-                      {activeTab === 'review-jurnal' && 'Antrean Review & Kepatuhan SOP'}
-                      {activeTab === 'lab-qr-core' && 'Manajemen Bilik Lab & Otentikasi QR'}
-                      {activeTab === 'inventaris-alat' && 'Inventarisasi Alat & Reagen Kimia'}
-                      {activeTab === 'audit-laporan' && 'Audit Trail & Rekapitulasi Laporan Bab 43'}
+                      {activeTab === 'arsip-jurnal' && 'Arsip & Manajemen Jurnal'}
+                      {activeTab === 'review-jurnal' && 'Antrean Review Jurnal'}
+                      {activeTab === 'lab-qr-core' && 'Akses Jurnal & Otentikasi QR'}
+                      {activeTab === 'inventaris-alat' && 'Kategori & Metadata Jurnal'}
+                      {activeTab === 'audit-laporan' && 'Audit Trail & Rekapitulasi Jurnal'}
                     </h2>
                     <p className="text-xs text-slate-500 mt-0.5">
-                      Sistem Informasi Laboratorium Terpadu SMAN 1 EduLab
+                      REJASA — Rapid Access Journal SMAN 3 Salatiga
                     </p>
                   </div>
                 </div>
@@ -439,7 +439,7 @@ export default function App() {
               </div>
 
               {/* View details */}
-              {activeTab === 'jurnal-laboratorium' && (
+              {activeTab === 'arsip-jurnal' && (
                 <JournalTable
                   journals={journals}
                   searchQuery={searchQuery}
@@ -451,7 +451,7 @@ export default function App() {
               {activeTab === 'review-jurnal' && (
                 <div>
                   <div className="mb-4 p-4 rounded-xl bg-[#FFFBEB] border border-amber-200 text-xs text-amber-800">
-                    Berikut adalah daftar praktikum yang membutuhkan verifikasi kepala laboratorium dalam SLA 60 menit.
+                    Berikut adalah daftar praktikum yang membutuhkan verifikasi kepala jurnal dalam SLA 60 menit.
                   </div>
                   <JournalTable
                     journals={journals.filter((j) => j.status !== 'REVIEWED')}
@@ -468,7 +468,7 @@ export default function App() {
                     <div>
                       <h3 className="font-bold text-sm">Generator Token QR Presensi Guru</h3>
                       <p className="text-xs text-slate-500">
-                        Cetak token fisik bilik untuk ditempel di pintu masing-masing laboratorium.
+                        Cetak token fisik bilik untuk ditempel di pintu masing-masing jurnal.
                       </p>
                     </div>
                     <button
@@ -519,7 +519,7 @@ export default function App() {
                     <div>
                       <h3 className="font-bold text-sm">Buku Register Kerusakan Alat (Bab 43)</h3>
                       <p className="text-xs text-slate-500">
-                        Catatan kronologis insiden laboratorium dan tindakan perbaikan.
+                        Catatan kronologis insiden jurnal dan tindakan perbaikan.
                       </p>
                     </div>
                     <button
