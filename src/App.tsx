@@ -87,7 +87,7 @@ export default function App() {
   // KPI Calculations
   const totalJournalsToday = journals.length;
   const pendingReviewCount = journals.filter(
-    (j) => j.status === 'SUBMITTED' || j.status === 'NEEDS_CORRECTION'
+    (j) => j.status === 'SUBMITTED'
   ).length;
   const activeIncidentsCount = incidents.filter((i) => i.status === 'Open').length;
   const occupiedLabsCount = rooms.filter(
@@ -454,7 +454,7 @@ export default function App() {
                     Berikut adalah jurnal yang membutuhkan review laboran.
                   </div>
                   <JournalTable
-                    journals={journals.filter((j) => j.status !== 'REVIEWED')}
+                    journals={journals.filter((j) => j.status === 'SUBMITTED')}
                     searchQuery={searchQuery}
                     onReviewJournal={handleOpenReview}
                     onViewAllJournals={() => {}}
