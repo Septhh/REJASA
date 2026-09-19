@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Sidebar } from './components/Sidebar';
 import { Header } from './components/Header';
 import { MetricCards } from './components/MetricCards';
@@ -10,18 +10,25 @@ import { IncidentModal } from './components/IncidentModal';
 import { CreateQRModal } from './components/CreateQRModal';
 import { ReviewJournalModal } from './components/ReviewJournalModal';
 import { PrintReportModal } from './components/PrintReportModal';
+import { InventoryPanel } from './components/InventoryPanel';
+import { QRManager } from './components/QRManager';
+import type { HeaderNotification } from './components/Header';
+import { api } from './lib/api';
+import { useAuth } from './lib/auth';
+import { addDaysStr, todayWib } from './lib/format';
 
 import {
   INITIAL_ROOMS,
-  INITIAL_JOURNALS,
-  INITIAL_INCIDENTS,
   LAB_MONTHLY_STATS,
   WEEKLY_HOURS_ALLOCATION,
 } from './data/labData';
 
-import { LabRoom, JournalEntry, IncidentItem, JournalStatus, LabCode } from './types';
+import { LabRoom, JournalEntry, IncidentItem, Lab, QRCodeInfo, InventoryItem } from './types';
 
 export default function App() {
+  const { user, logout } = useAuth();
+  const isAdmin = user?.role === 'ADMIN';
+
   // Navigation & View state
   const [activeTab, setActiveTab] = useState<string>('dashboard');
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
@@ -58,8 +65,14 @@ export default function App() {
 
   // Main data collections
   const [rooms, setRooms] = useState<LabRoom[]>(INITIAL_ROOMS);
-  const [journals, setJournals] = useState<JournalEntry[]>(INITIAL_JOURNALS);
-  const [incidents, setIncidents] = useState<IncidentItem[]>(INITIAL_INCIDENTS);
+  const [journals, setJournals] = useState<JournalEntry[]>([]);
+  const [incidents, setIncidents] = useState<IncidentItem[]>([]);
+  const [labs, setLabs] = useState<Lab[]>([]);
+  const [qrCodes, setQrCodes] = useState<QRCodeInfo[]>([]);
+  const [inventory, setInventory] = useState<InventoryItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState('');
+  const [qrLabId, setQrLabId] = useState<number | null>(null);
   const [weeklyAllocation] = useState(WEEKLY_HOURS_ALLOCATION);
   const [usageStats] = useState(LAB_MONTHLY_STATS);
 
@@ -84,8 +97,51 @@ export default function App() {
     }, 4000);
   };
 
+  // Memuat data dari API (jurnal & insiden untuk staf; lab, QR, inventaris hanya ADMIN).
+  const loadAll = useCallback(async () => {
+    try {
+      const [j, i] = await Promise.all([
+        api.get<{ journals: JournalEntry[] }>('/journals'),
+        api.get<{ incidents: IncidentItem[] }>('/incidents'),
+      ]);
+      setJournals(j.journals);
+      setIncidents(i.incidents);
+      if (isAdmin) {
+        const [l, q, inv] = await Promise.all([
+          api.get<{ labs: Lab[] }>('/labs'),
+          api.get<{ qrCodes: QRCodeInfo[] }>('/qr'),
+          api.get<{ items: InventoryItem[] }>('/inventory'),
+        ]);
+        setLabs(l.labs);
+        setQrCodes(q.qrCodes);
+        setInventory(inv.items);
+      }
+      setLoadError('');
+    } catch (e: any) {
+      setLoadError(e?.message || 'Gagal memuat data.');
+    } finally {
+      setLoading(false);
+    }
+  }, [isAdmin]);
+
+  useEffect(() => {
+    loadAll();
+    const t = setInterval(loadAll, 30_000);
+    return () => clearInterval(t);
+  }, [loadAll]);
+
+  // Rentang waktu dashboard (WIB)
+  const today = todayWib();
+  const inRange = (j: JournalEntry) => {
+    const d = j.date ?? today;
+    if (selectedTimeRange === 'today') return d === today;
+    if (selectedTimeRange === 'yesterday') return d === addDaysStr(today, -1);
+    return d >= addDaysStr(today, -6) && d <= today;
+  };
+  const dashboardJournals = journals.filter(inRange);
+
   // KPI Calculations
-  const totalJournalsToday = journals.length;
+  const totalJournalsToday = dashboardJournals.length;
   const pendingReviewCount = journals.filter(
     (j) => j.status === 'SUBMITTED'
   ).length;
@@ -109,22 +165,17 @@ export default function App() {
     }
   };
 
-  const handleSubmitDisposition = (
+  const handleSubmitDisposition = async (
     incidentId: string,
     data: { action: string; urgency: string; notes: string }
   ) => {
-    setIncidents((prev) =>
-      prev.map((item) =>
-        item.id === incidentId
-          ? {
-              ...item,
-              status: 'Disposed',
-              actionLabel: 'Tiket Diproses',
-            }
-          : item
-      )
-    );
-    showToast(`Tiket penanganan berhasil diterbitkan untuk insiden ${selectedIncident?.assetCode}!`);
+    try {
+      const r = await api.patch<{ incident: IncidentItem }>(`/incidents/${incidentId}/disposition`, data);
+      setIncidents((prev) => prev.map((item) => (item.id === incidentId ? r.incident : item)));
+      showToast(`Tiket penanganan berhasil diterbitkan untuk insiden ${r.incident.assetCode}!`);
+    } catch (e: any) {
+      showToast(e?.message || 'Gagal memproses tiket insiden.');
+    }
   };
 
   const handleOpenReview = (journal: JournalEntry) => {
@@ -132,78 +183,58 @@ export default function App() {
     setIsReviewModalOpen(true);
   };
 
-  const handleUpdateJournalStatus = (
+  const handleSubmitReview = async (
     journalId: string,
-    newStatus: JournalStatus,
-    reviewNotes: string
+    newStatus: 'REVIEWED' | 'NEEDS_CORRECTION',
+    reviewNotes: string,
+    sopComplied: boolean
   ) => {
-    setJournals((prev) =>
-      prev.map((j) =>
-        j.id === journalId
-          ? {
-              ...j,
-              status: newStatus,
-              notes: reviewNotes || j.notes,
-            }
-          : j
-      )
+    const r = await api.post<{ journal: JournalEntry }>(`/journals/${journalId}/reviews`, {
+      status: newStatus,
+      notes: reviewNotes,
+      sopComplied,
+    });
+    setJournals((prev) => prev.map((j) => (j.id === journalId ? r.journal : j)));
+    showToast(
+      newStatus === 'REVIEWED'
+        ? `Jurnal ${r.journal.code} telah diverifikasi & disetujui.`
+        : `Jurnal ${r.journal.code} dikembalikan untuk perbaikan guru.`
     );
-    if (newStatus === 'REVIEWED') {
-      showToast(`Jurnal ${selectedJournal?.code} telah diverifikasi & disetujui.`);
-    } else {
-      showToast(`Jurnal ${selectedJournal?.code} dikembalikan untuk perbaikan guru.`);
-    }
   };
 
-  const handleCreateSessionQR = (data: {
-    labCode: LabCode;
-    className: string;
-    teacherName: string;
-    topic: string;
-    session: string;
-  }) => {
-    const newJournal: JournalEntry = {
-      id: `jr-${Date.now()}`,
-      code: `JR-${new Date().toISOString().slice(0, 10).replace(/-/g, '')}-000${journals.length + 1}`,
-      session: data.session.slice(0, 10),
-      time: new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) + ' WIB',
-      labCode: data.labCode,
-      labName:
-        data.labCode === 'BIO'
-          ? 'Lab Biologi Terpadu'
-          : data.labCode === 'FIS'
-          ? 'Lab Fisika Modern'
-          : data.labCode === 'KIM'
-          ? 'Lab Kimia Anorganik'
-          : data.labCode === 'COM'
-          ? 'Lab Komputer Sains'
-          : 'Smartclass & Bahasa',
-      teacherName: data.teacherName,
-      teacherInitials: data.teacherName
-        .split(' ')
-        .slice(0, 2)
-        .map((w) => w[0])
-        .join(''),
-      teacherAvatarColor: 'bg-[#00685f]',
-      className: data.className,
-      topic: data.topic,
-      status: 'SUBMITTED',
-      studentsCount: 36,
-      sopComplied: true,
-    };
-
-    setJournals((prev) => [newJournal, ...prev]);
-    showToast(`Sesi QR baru diterbitkan untuk ${data.className} di Lab ${data.labCode}!`);
+  const openQRManager = (labId?: number) => {
+    setQrLabId(labId ?? null);
+    setIsCreateQROpen(true);
   };
 
   const [isRefreshing, setIsRefreshing] = useState(false);
   const handleRefresh = () => {
     setIsRefreshing(true);
-    setTimeout(() => {
+    loadAll().then(() => {
       setIsRefreshing(false);
       showToast('Data REJASA berhasil disinkronkan.');
-    }, 700);
+    });
   };
+
+  const notifications: HeaderNotification[] = [];
+  if (pendingReviewCount > 0)
+    notifications.push({
+      id: 'n-review',
+      title: 'Review Jurnal Diperlukan',
+      desc: `${pendingReviewCount} jurnal laboratorium menunggu review.`,
+      time: 'Saat ini',
+      type: 'info',
+    });
+  if (activeIncidentsCount > 0)
+    notifications.push({
+      id: 'n-incident',
+      title: 'Insiden Alat Terbuka',
+      desc: `${activeIncidentsCount} insiden alat wajib ditindaklanjuti.`,
+      time: 'Saat ini',
+      type: 'danger',
+    });
+
+  if (!user) return null;
 
   return (
     <div className="bg-[#F8FAFC] min-h-screen text-[#131b2e] flex flex-col antialiased selection:bg-[#00685f]/20 selection:text-[#00685f]">
@@ -230,6 +261,8 @@ export default function App() {
         pendingCount={pendingReviewCount}
         isOpenMobile={isMobileSidebarOpen}
         onCloseMobile={() => setIsMobileSidebarOpen(false)}
+        user={user}
+        onLogout={logout}
       />
 
       {/* Main Layout Area */}
@@ -238,10 +271,12 @@ export default function App() {
         <Header
           searchQuery={searchQuery}
           setSearchQuery={setSearchQuery}
-          onOpenCreateQR={() => setIsCreateQROpen(true)}
+          onOpenCreateQR={() => openQRManager()}
+          canCreateQR={isAdmin}
+          notifications={notifications}
           onOpenPrintReport={() => setIsPrintModalOpen(true)}
           onToggleMobileSidebar={() => setIsMobileSidebarOpen(true)}
-          unreadAlertCount={activeIncidentsCount + 1}
+          unreadAlertCount={notifications.length}
         />
 
         {/* Main Content Area */}
@@ -249,6 +284,14 @@ export default function App() {
           {/* Dynamic Atmospheric Background Glow */}
           <div className="absolute -top-24 -left-20 w-96 h-96 rounded-full bg-[#00685f]/10 blur-3xl pointer-events-none" />
           <div className="absolute top-1/2 -right-32 w-[32rem] h-[32rem] rounded-full bg-[#00687a]/5 blur-3xl pointer-events-none" />
+
+          {loadError && (
+            <div role="alert" className="relative z-10 mb-4 p-3 rounded-xl bg-[#FFF1F2] border border-rose-200 text-xs text-[#E11D48] flex items-center justify-between">
+              <span>{loadError}</span>
+              <button onClick={() => loadAll()} className="font-bold underline">Coba lagi</button>
+            </div>
+          )}
+          {loading && <p className="relative z-10 text-xs text-slate-400 mb-4">Memuat data…</p>}
 
           {/* Tab Content switch */}
           {activeTab === 'dashboard' ? (
@@ -383,7 +426,7 @@ export default function App() {
                 <div className="lg:col-span-8 flex flex-col gap-6">
                   {/* Table Component */}
                   <JournalTable
-                    journals={journals}
+                    journals={dashboardJournals}
                     searchQuery={searchQuery}
                     onReviewJournal={handleOpenReview}
                     onViewAllJournals={() => setActiveTab('jurnal-laboratorium')}
@@ -462,48 +505,29 @@ export default function App() {
                 </div>
               )}
 
-              {activeTab === 'lab-qr-core' && (
+              {activeTab === 'lab-qr-core' && isAdmin && (
                 <div className="space-y-6">
                   <div className="flex justify-between items-center bg-slate-50 p-4 rounded-xl border border-slate-200">
                     <div>
-                      <h3 className="font-bold text-sm">Generator Token QR Presensi Guru</h3>
+                      <h3 className="font-bold text-sm">QR Identitas Laboratorium</h3>
                       <p className="text-xs text-slate-500">
-                        Cetak token fisik bilik untuk ditempel di pintu masing-masing jurnal.
+                        Cetak QR untuk ditempel di pintu laboratorium. Guru yang scan akan diarahkan ke alur jurnal; QR tidak berisi data inventaris.
                       </p>
                     </div>
                     <button
-                      onClick={() => setIsCreateQROpen(true)}
+                      onClick={() => openQRManager()}
                       className="px-4 py-2 bg-[#00685f] text-white rounded-xl text-xs font-bold"
                     >
-                      + Buat Sesi QR Baru
+                      Kelola QR
                     </button>
                   </div>
-                  <RoomStatusGrid
-                    rooms={rooms}
-                    onSelectRoom={(r) => showToast(`Konfigurasi bilik ${r.name}`)}
-                  />
+                  <QRManager labs={labs} qrCodes={qrCodes} onManage={(id) => openQRManager(id)} />
                 </div>
               )}
 
-              {activeTab === 'inventaris-alat' && (
+              {activeTab === 'inventaris-alat' && isAdmin && (
                 <div className="space-y-6">
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div className="p-4 rounded-xl bg-slate-50 border border-slate-200">
-                      <div className="text-xs text-slate-500">Total Alat &amp; Mikroskop</div>
-                      <div className="text-2xl font-bold text-[#131b2e] mt-1">142 Unit</div>
-                      <div className="text-xs text-[#059669] mt-1">140 Kondisi Baik</div>
-                    </div>
-                    <div className="p-4 rounded-xl bg-[#FFF1F2] border border-rose-200">
-                      <div className="text-xs text-[#E11D48]">Alat Rusak / Insiden</div>
-                      <div className="text-2xl font-bold text-[#E11D48] mt-1">2 Unit</div>
-                      <div className="text-xs text-slate-500 mt-1">BIO-MIC-03 &amp; KIM-GLS-118</div>
-                    </div>
-                    <div className="p-4 rounded-xl bg-[#FFFBEB] border border-amber-200">
-                      <div className="text-xs text-[#D97706]">Reagen Kritis (&lt;20%)</div>
-                      <div className="text-2xl font-bold text-[#D97706] mt-1">3 Botol</div>
-                      <div className="text-xs text-slate-500 mt-1">HCl 0.1M, Fenolftalein, NaOH</div>
-                    </div>
-                  </div>
+                  <InventoryPanel items={inventory} />
                   <IncidentHub
                     incidents={incidents}
                     usageStats={usageStats}
@@ -579,11 +603,14 @@ export default function App() {
         onSubmitDisposition={handleSubmitDisposition}
       />
 
-      {/* MODAL 2: + Buat Jurnal QR */}
+      {/* MODAL 2: QR Laboratorium (ADMIN) */}
       <CreateQRModal
         isOpen={isCreateQROpen}
         onClose={() => setIsCreateQROpen(false)}
-        onCreateSession={handleCreateSessionQR}
+        labs={labs}
+        initialLabId={qrLabId}
+        onChanged={loadAll}
+        onToast={showToast}
       />
 
       {/* MODAL 3: Review & Verifikasi Jurnal */}
@@ -594,7 +621,7 @@ export default function App() {
           setIsReviewModalOpen(false);
           setSelectedJournal(null);
         }}
-        onUpdateStatus={handleUpdateJournalStatus}
+        onSubmitReview={handleSubmitReview}
       />
 
       {/* MODAL 4: Cetak Laporan */}
