@@ -175,7 +175,11 @@ export default function App() {
     }
   };
 
-  const handleCreateSessionQR = (data) => {
+  const handleCreateSessionQR = async (data) => {
+    try {
+      const result = await api.journals();
+      setJournals(result.journals || []);
+    } catch {}
     showToast(`QR laboratorium ${data.labCode} diterbitkan.`);
   };
 
