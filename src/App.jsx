@@ -175,41 +175,8 @@ export default function App() {
     }
   };
 
-  const handleCreateSessionQR = (data: { labCode: LabCode }) => {
+  const handleCreateSessionQR = (data) => {
     showToast(`QR laboratorium ${data.labCode} diterbitkan.`);
-    return;
-    const newJournal: JournalEntry = {
-      id: `jr-${Date.now()}`,
-      code: `JR-${new Date().toISOString().slice(0, 10).replace(/-/g, '')}-000${journals.length + 1}`,
-      session: data.session.slice(0, 10),
-      time: new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) + ' WIB',
-      labCode: data.labCode,
-      labName:
-        data.labCode === 'BIO'
-          ? 'Lab Biologi Terpadu'
-          : data.labCode === 'FIS'
-          ? 'Lab Fisika Modern'
-          : data.labCode === 'KIM'
-          ? 'Lab Kimia Anorganik'
-          : data.labCode === 'COM'
-          ? 'Lab Komputer Sains'
-          : 'Smartclass & Bahasa',
-      teacherName: data.teacherName,
-      teacherInitials: data.teacherName
-        .split(' ')
-        .slice(0, 2)
-        .map((w) => w[0])
-        .join(''),
-      teacherAvatarColor: 'bg-[#00685f]',
-      className: data.className,
-      topic: data.topic,
-      status: 'SUBMITTED',
-      studentsCount: 36,
-      sopComplied: true,
-    };
-
-    setJournals((prev) => [newJournal, ...prev]);
-    showToast(`Sesi QR baru diterbitkan untuk ${data.className} di Lab ${data.labCode}!`);
   };
 
   const [isRefreshing, setIsRefreshing] = useState(false);
