@@ -1,6 +1,6 @@
 export type LabCode = 'BIO' | 'FIS' | 'KIM' | 'COM' | 'BSM';
 
-export type JournalStatus = 'NEEDS_CORRECTION' | 'SUBMITTED' | 'REVIEWED';
+export type JournalStatus = 'DRAFT' | 'NEEDS_CORRECTION' | 'SUBMITTED' | 'REVIEWED';
 
 export type RoomStatus = 'Insiden' | 'Berjalan' | 'Praktikum' | 'Standby' | 'Sterilisasi';
 
