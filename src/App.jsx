@@ -9,6 +9,8 @@ import { IncidentHub } from './components/IncidentHub';
 import { IncidentModal } from './components/IncidentModal';
 import { CreateQRModal } from './components/CreateQRModal';
 import { ReviewJournalModal } from './components/ReviewJournalModal';
+import { TeacherFlow } from './components/TeacherFlow';
+import { api } from './api';
 import { PrintReportModal } from './components/PrintReportModal';
 
 import {
@@ -21,6 +23,8 @@ import {
 
 
 export default function App() {
+  const qrToken = new URLSearchParams(window.location.search).get('qr');
+
   // Navigation & View state
   const [activeTab, setActiveTab] = useState('dashboard');
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
@@ -126,16 +130,33 @@ export default function App() {
     showToast(`Tiket penanganan berhasil diterbitkan untuk insiden ${selectedIncident?.assetCode}!`);
   };
 
-  const handleOpenReview = (journal: JournalEntry) => {
-    setSelectedJournal(journal);
+  const handleOpenReview = async (journal: JournalEntry) => {
+    try {
+      const me = await api.me();
+      if (!me.user) {
+        const code = window.prompt('Kode reviewer (ADMIN atau LAB):');
+        if (!code) return;
+        await api.login(code);
+      }
+      const result = await api.journal(journal.id);
+      setSelectedJournal(result.journal);
+    } catch {
+      setSelectedJournal(journal);
+    }
     setIsReviewModalOpen(true);
   };
 
-  const handleUpdateJournalStatus = (
+  const handleUpdateJournalStatus = async (
     journalId,
     newStatus,
     reviewNotes
   ) => {
+    try {
+      await api.review(journalId, { status: newStatus, notes: reviewNotes || '' });
+      showToast(newStatus === 'REVIEWED' ? 'Jurnal berhasil direview.' : 'Jurnal dikembalikan untuk koreksi.');
+    } catch {
+      showToast('Review API gagal. Pastikan reviewer sudah login dan server aktif.');
+    }
     setJournals((prev) =>
       prev.map((j) =>
         j.id === journalId
@@ -154,13 +175,9 @@ export default function App() {
     }
   };
 
-  const handleCreateSessionQR = (data: {
-    labCode;
-    className;
-    teacherName;
-    topic;
-    session;
-  }) => {
+  const handleCreateSessionQR = (data: { labCode: LabCode }) => {
+    showToast(`QR laboratorium ${data.labCode} diterbitkan.`);
+    return;
     const newJournal: JournalEntry = {
       id: `jr-${Date.now()}`,
       code: `JR-${new Date().toISOString().slice(0, 10).replace(/-/g, '')}-000${journals.length + 1}`,
@@ -203,6 +220,10 @@ export default function App() {
       showToast('Data REJASA berhasil disinkronkan.');
     }, 700);
   };
+
+  if (qrToken) {
+    return <TeacherFlow token={qrToken} onExit={() => { window.history.replaceState({}, '', window.location.pathname); window.location.reload(); }} />;
+  }
 
   return (
     <div className="bg-[#F8FAFC] min-h-screen text-[#131b2e] flex flex-col antialiased selection:bg-[#00685f]/20 selection:text-[#00685f]">
