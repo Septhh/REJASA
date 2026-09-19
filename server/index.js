@@ -132,9 +132,11 @@ function publicLab(row) { return {id:row.id,code:row.code,name:row.name}; }
 function publicJournal(row) {
   return {
     id:row.id, code:row.code, labId:row.lab_id, labCode:row.lab_code, labName:row.lab_name,
-    teacherId:row.teacher_id, teacherName:row.teacher_name, className:row.class_name,
+    teacherId:row.teacher_id, teacherName:row.teacher_name, teacherInitials:(row.teacher_name||'').split(/\\s+/).slice(0,2).map(v=>v[0]).join(''),
+    teacherAvatarColor:'bg-[#00685f]', className:row.class_name, session:row.date,
     date:row.date, time:row.time, subject:row.subject, activity:row.activity,
-    notes:row.notes, studentsCount:row.students_count, status:row.status,
+    topic:row.activity || row.subject, notes:row.notes, studentsCount:row.students_count,
+    sopComplied:true, status:row.status,
     createdAt:row.created_at, updatedAt:row.updated_at
   };
 }
